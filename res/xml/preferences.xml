@@ -97,7 +97,23 @@
             android:title="@string/pref_title_mms_retrieval_during_roaming"
             android:summary="@string/pref_summary_mms_retrieval_during_roaming" />
 
-    </PreferenceCategory>
+    <Preference android:key="pref_key_mms_delete_limit"
+                      android:dependency="pref_key_auto_delete"
+                      android:persistent="false"
+                      android:summary="@string/pref_summary_delete_limit"
+                      android:title="@string/pref_title_mms_delete" />
+
+   <PreferenceCategory
+        android:title="@string/pref_display_title"
+        android:key="pref_key_display_settings" />
+
+        <CheckBoxPreference
+           android:defaultValue="false"
+           android:key="pref_key_display_fulldate"
+           android:summary="@string/pref_summary_fulldate"
+           android:title="@string/pref_title_fulldate" />
+    
+   </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/pref_emoji_settings"
