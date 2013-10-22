@@ -69,16 +69,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String AUTO_RETRIEVAL           = "pref_key_mms_auto_retrieval";
     public static final String RETRIEVAL_DURING_ROAMING = "pref_key_mms_retrieval_during_roaming";
     public static final String AUTO_DELETE              = "pref_key_auto_delete";
-
     public static final String GROUP_MMS_MODE           = "pref_key_mms_group_mms";
 
-	// Emoji and Unicode
+    // Emoji and Unicode
     public static final String ENABLE_EMOJIS            = "pref_key_enable_emojis";
     public static final String STRIP_UNICODE            = "pref_key_strip_unicode";
-    public static final String ENABLE_EMOJIS            = "pref_key_enable_emojis";
-
     public static final String DISPLAY_FULLDATE         = "pref_key_display_fulldate";
-
 
     // Menu entries
     private static final int MENU_RESTORE_DEFAULTS    = 1;

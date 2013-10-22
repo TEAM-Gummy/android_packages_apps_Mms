@@ -97,27 +97,17 @@
             android:title="@string/pref_title_mms_retrieval_during_roaming"
             android:summary="@string/pref_summary_mms_retrieval_during_roaming" />
 
-    <Preference android:key="pref_key_mms_delete_limit"
-                      android:dependency="pref_key_auto_delete"
-                      android:persistent="false"
-                      android:summary="@string/pref_summary_delete_limit"
-                      android:title="@string/pref_title_mms_delete" />
+    </PreferenceCategory>
 
-   <PreferenceCategory
-        android:title="@string/pref_display_title"
-        android:key="pref_key_display_settings" />
+    <PreferenceCategory
+        android:title="@string/general_category_title"
+        android:key="pref_key_general_category">
 
         <CheckBoxPreference
            android:defaultValue="false"
            android:key="pref_key_display_fulldate"
            android:summary="@string/pref_summary_fulldate"
            android:title="@string/pref_title_fulldate" />
-    
-   </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/pref_emoji_settings"
-        android:key="pref_key_emoji_settings">
 
         <CheckBoxPreference
             android:key="pref_key_strip_unicode"

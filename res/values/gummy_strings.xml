@@ -19,6 +19,9 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <!-- Category Headers -->
+    <string name="general_category_title">General Settings</string>
+
     <!-- Breathing Notifications -->
     <string name="sms_breath">Breathing SMS</string>
     <string name="sms_breath_summary">Will give your sms notifications a breathing effect in the statusbar.</string>
@@ -36,5 +39,8 @@
 
     <!-- Emoji Menu item -->
     <string name="menu_insert_emoji">Insert emojis</string>
+
+    <!-- In message list items, this string builds the timestamp line when the message is in a group [CHAR LIMIT=NONE] -->
+    <string name="message_timestamp_format"><xliff:g id="string" example="Fred Flinstone">%1$s</xliff:g>\u0020-\u0020<xliff:g id="string" example="9:39AM">%2$s</xliff:g></string>
 
 </resources>
