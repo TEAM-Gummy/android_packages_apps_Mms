@@ -75,6 +75,10 @@ import android.gesture.GestureOverlayView;
 import android.gesture.GestureOverlayView.OnGesturePerformedListener;
 import android.gesture.Prediction;
 import android.graphics.drawable.Drawable;
+import android.hardware.SensorEventListener;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -159,6 +163,7 @@ import com.android.mms.transaction.MessagingNotification;
 import com.android.mms.transaction.SmsReceiverService;
 import com.android.mms.ui.MessageListView.OnSizeChangedListener;
 import com.android.mms.ui.MessageUtils.ResizeImageResultCallback;
+import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.ui.RecipientsEditor.RecipientContextMenuInfo;
 import com.android.mms.util.DraftCache;
 import com.android.mms.util.PhoneNumberFormatter;
@@ -188,7 +193,7 @@ import com.google.android.mms.pdu.SendReq;
  */
 public class ComposeMessageActivity extends Activity
         implements View.OnClickListener, TextView.OnEditorActionListener,
-        MessageStatusListener, Contact.UpdateListener, OnGesturePerformedListener,
+        MessageStatusListener, Contact.UpdateListener, OnGesturePerformedListener, SensorEventListener,
         LoaderManager.LoaderCallbacks<Cursor>  {
     public static final int REQUEST_CODE_ATTACH_IMAGE     = 100;
     public static final int REQUEST_CODE_TAKE_PICTURE     = 101;
@@ -350,6 +355,13 @@ public class ComposeMessageActivity extends Activity
     private double mGestureSensitivity;
 
     private int mInputMethod;
+
+    private SensorManager mSensorManager;
+    private int SensorOrientationY;
+    private int SensorProximity;
+    private int oldProximity;
+    private boolean initProx;
+    private boolean proxChanged;
 
     private int mLastSmoothScrollPosition;
     private boolean mScrollOnSend;      // Flag that we need to scroll the list to the end.
@@ -1613,7 +1625,7 @@ public class ComposeMessageActivity extends Activity
     }
 
     /**
-     * Copies media from an Mms to the "download" directory on the SD card. If any of the parts
+     * Copies media from an Mms to a directory on the SD card. If any of the parts
      * are audio types, drm'd or not, they're copied to the "Ringtones" directory.
      * @param msgId
      */
@@ -1686,9 +1698,15 @@ public class ComposeMessageActivity extends Activity
                 // Depending on the location, there may be an
                 // extension already on the name or not. If we've got audio, put the attachment
                 // in the Ringtones directory.
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                String mMmsDir = prefs.getString(MessagingPreferenceActivity.MMS_SAVE_LOCATION, "download");
                 String dir = Environment.getExternalStorageDirectory() + "/"
                                 + (ContentType.isAudioType(type) ? Environment.DIRECTORY_RINGTONES :
                                     Environment.DIRECTORY_DOWNLOADS)  + "/";
+                if (!mMmsDir.isEmpty()) {
+                    dir = Environment.getExternalStorageDirectory() + "/"
+                                    + prefs.getString(MessagingPreferenceActivity.MMS_SAVE_LOCATION, "download")  + "/";
+                }
                 String extension;
                 int index;
                 if ((index = fileName.lastIndexOf('.')) == -1) {
@@ -1992,6 +2010,59 @@ public class ComposeMessageActivity extends Activity
         if (TRACE) {
             android.os.Debug.startMethodTracing("compose");
         }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+    switch (event.sensor.getType()) {
+    case Sensor.TYPE_ORIENTATION:
+        SensorOrientationY = (int) event.values[SensorManager.DATA_Y];
+        break;
+    case Sensor.TYPE_PROXIMITY:
+        int currentProx = (int) event.values[0];
+        if (initProx) {
+            SensorProximity = currentProx;
+            initProx = false;
+        } else {
+            if( SensorProximity > 0 && currentProx == 0){
+                proxChanged = true;
+            }
+        }
+        SensorProximity = currentProx;
+        break;
+    }
+
+    if (rightOrientation(SensorOrientationY) && SensorProximity == 0 && proxChanged ) {
+        if (getRecipients().isEmpty() == false) {
+            // unregister Listener to don't let the onSesorChanged run the
+            // whole time
+            mSensorManager.unregisterListener(this, mSensorManager
+                    .getDefaultSensor(Sensor.TYPE_ORIENTATION));
+            mSensorManager.unregisterListener(this,
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY));
+
+            // get number and attach it to an Intent.ACTION_CALL, then start
+            // the Intent
+            String number = getRecipients().get(0).getNumber();
+            Intent dialIntent = new Intent(Intent.ACTION_CALL);
+            dialIntent.setData(Uri.fromParts("tel", number, null));
+            dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(dialIntent);
+        }
+    }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    public boolean rightOrientation(int orientation) {
+    if (orientation < -50 && orientation > -130) {
+        return true;
+    } else {
+        return false;
+    }
     }
 
     private void showSubjectEditor(boolean show) {
@@ -2381,7 +2452,24 @@ public class ComposeMessageActivity extends Activity
             }
         }, 100);
 
-        // Load the selected input type
+        try {
+        if(MessagingPreferenceActivity.getDirectCallEnabled(ComposeMessageActivity.this)) {
+            SensorOrientationY = 0;
+            SensorProximity = 0;
+            proxChanged = false;
+            initProx = true;
+            mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+            mSensorManager.registerListener(this,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+                        SensorManager.SENSOR_DELAY_UI);
+            mSensorManager.registerListener(this,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+                        SensorManager.SENSOR_DELAY_UI);
+        }
+    } catch (Exception e) {
+        Log.w("ERROR", e.toString());
+    }
+
         SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
         mInputMethod = Integer.parseInt(prefs.getString(MessagingPreferenceActivity.INPUT_TYPE,
@@ -2413,6 +2501,16 @@ public class ComposeMessageActivity extends Activity
 
         removeRecipientsListeners();
 
+    try {
+        if(MessagingPreferenceActivity.getDirectCallEnabled(ComposeMessageActivity.this)) {
+            mSensorManager.unregisterListener(this,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION));
+            mSensorManager.unregisterListener(this,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY));
+        }
+    } catch (Exception e) {
+        Log.w("ERROR", e.toString());
+    }
         // remove any callback to display a progress spinner
         if (mAsyncDialog != null) {
             mAsyncDialog.clearPendingProgressDialog();
@@ -3963,6 +4061,12 @@ public class ComposeMessageActivity extends Activity
             // strip unicode chars before sending (if applicable)
             mWorkingMessage.setText(stripUnicodeIfRequested(mWorkingMessage.getText()));
             mWorkingMessage.send(mDebugRecipients);
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String mSignature = prefs.getString(MessagingPreferenceActivity.MSG_SIGNATURE, "");
+            if (!mSignature.isEmpty()) {
+                mWorkingMessage.setText(mWorkingMessage.getText() + "\n" + mSignature);
+            }
 
             mSentMessage = true;
             mSendingMessage = true;

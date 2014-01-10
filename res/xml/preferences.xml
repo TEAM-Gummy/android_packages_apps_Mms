@@ -140,6 +140,13 @@
             android:key="pref_key_mms_retrieval_during_roaming"
             android:title="@string/pref_title_mms_retrieval_during_roaming"
             android:summary="@string/pref_summary_mms_retrieval_during_roaming" />
+
+        <EditTextPreference
+            android:key="pref_save_location"
+            android:title="@string/pref_title_save_location"
+            android:summary="@string/pref_title_save_location_summary"
+            android:dialogTitle="@string/pref_title_save_location"
+            android:defaultValue="download" />
     </PreferenceCategory>
 
     <!-- Notification Settings -->
@@ -270,5 +277,24 @@
             android:title="@string/pref_title_input_type"
             android:entries="@array/pref_entries_input_type"
             android:entryValues="@array/pref_values_input_type" />
-    </PreferenceCategory>
+        <CheckBoxPreference
+            android:key="direct_call_pref"
+            android:title="@string/direct_call_title"
+            android:summary="@string/direct_call_summary"/>
+        <ListPreference
+            android:key="pref_key_mms_message_font_size"
+            android:defaultValue="18"
+            android:title="@string/pref_title_mms_message_font_size"
+            android:summary="@string/pref_summary_mms_message_font_size"
+            android:entries="@array/pref_mms_message_font_size_entries"
+            android:entryValues="@array/pref_mms_message_font_size_values"
+            android:dialogTitle="@string/pref_dialogtitle_mms_message_font_size"/>
+        <EditTextPreference
+            android:key="pref_msg_signature"
+            android:title="@string/msg_sig_title"
+            android:summary="@string/msg_sig_summary"
+            android:dialogTitle="@string/msg_sig_title"
+            android:hint="@string/msg_sig_enter_text"
+            android:defaultValue="" />
+  </PreferenceCategory>
 </PreferenceScreen>

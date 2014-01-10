@@ -29,6 +29,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -60,56 +61,61 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             implements OnPreferenceChangeListener {
     // Symbolic names for the keys used for preference lookup
     public static final String MMS_DELIVERY_REPORT_MODE = "pref_key_mms_delivery_reports";
-    public static final String EXPIRY_TIME              = "pref_key_mms_expiry";
-    public static final String PRIORITY                 = "pref_key_mms_priority";
-    public static final String READ_REPORT_MODE         = "pref_key_mms_read_reports";
+    public static final String EXPIRY_TIME = "pref_key_mms_expiry";
+    public static final String PRIORITY = "pref_key_mms_priority";
+    public static final String READ_REPORT_MODE = "pref_key_mms_read_reports";
     public static final String SMS_DELIVERY_REPORT_MODE = "pref_key_sms_delivery_reports";
-    public static final String NOTIFICATION_ENABLED     = "pref_key_enable_notifications";
-    public static final String NOTIFICATION_VIBRATE     = "pref_key_vibrate";
-    public static final String NOTIFICATION_VIBRATE_WHEN= "pref_key_vibrateWhen";
-    public static final String NOTIFICATION_RINGTONE    = "pref_key_ringtone";
-    public static final String NOTIFICATION_BREATH      = "pref_key_sms_breath";
-    public static final String AUTO_RETRIEVAL           = "pref_key_mms_auto_retrieval";
+    public static final String NOTIFICATION_ENABLED = "pref_key_enable_notifications";
+    public static final String NOTIFICATION_VIBRATE = "pref_key_vibrate";
+    public static final String NOTIFICATION_VIBRATE_WHEN = "pref_key_vibrateWhen";
+    public static final String NOTIFICATION_RINGTONE = "pref_key_ringtone";
+    public static final String NOTIFICATION_BREATH = "pref_key_sms_breath";
+    public static final String AUTO_RETRIEVAL = "pref_key_mms_auto_retrieval";
     public static final String RETRIEVAL_DURING_ROAMING = "pref_key_mms_retrieval_during_roaming";
-    public static final String AUTO_DELETE              = "pref_key_auto_delete";
-    public static final String GROUP_MMS_MODE           = "pref_key_mms_group_mms";
+    public static final String AUTO_DELETE = "pref_key_auto_delete";
+    public static final String GROUP_MMS_MODE = "pref_key_mms_group_mms";
+    public static final String MMS_SAVE_LOCATION = "pref_save_location";
+    public static final String MSG_SIGNATURE = "pref_msg_signature";
 
     // Unicode
-    public static final String UNICODE_STRIPPING            = "pref_key_unicode_stripping";
-    public static final String UNICODE_STRIPPING_VALUE      = "pref_key_unicode_stripping_value";
-    public static final int UNICODE_STRIPPING_LEAVE_INTACT  = 0;
+    public static final String UNICODE_STRIPPING = "pref_key_unicode_stripping";
+    public static final String UNICODE_STRIPPING_VALUE = "pref_key_unicode_stripping_value";
+    public static final int UNICODE_STRIPPING_LEAVE_INTACT = 0;
     public static final int UNICODE_STRIPPING_NON_DECODABLE = 1;
 
     // Split sms
-    public static final String SMS_SPLIT_COUNTER        = "pref_key_sms_split_counter";
+    public static final String SMS_SPLIT_COUNTER = "pref_key_sms_split_counter";
 
     // Templates
-    public static final String MANAGE_TEMPLATES         = "pref_key_templates_manage";
-    public static final String SHOW_GESTURE             = "pref_key_templates_show_gesture";
-    public static final String GESTURE_SENSITIVITY      = "pref_key_templates_gestures_sensitivity";
+    public static final String MANAGE_TEMPLATES = "pref_key_templates_manage";
+    public static final String SHOW_GESTURE = "pref_key_templates_show_gesture";
+    public static final String GESTURE_SENSITIVITY = "pref_key_templates_gestures_sensitivity";
     public static final String GESTURE_SENSITIVITY_VALUE = "pref_key_templates_gestures_sensitivity_value";
 
     // Timestamps
-    public static final String FULL_TIMESTAMP            = "pref_key_mms_full_timestamp";
-    public static final String SENT_TIMESTAMP            = "pref_key_mms_use_sent_timestamp";
+    public static final String FULL_TIMESTAMP = "pref_key_mms_full_timestamp";
+    public static final String SENT_TIMESTAMP = "pref_key_mms_use_sent_timestamp";
 
     // Privacy mode
     public static final String PRIVACY_MODE_ENABLED = "pref_key_enable_privacy_mode";
 
     // Keyboard input type
-    public static final String INPUT_TYPE                = "pref_key_mms_input_type";
+    public static final String INPUT_TYPE = "pref_key_mms_input_type";
 
     // QuickMessage
-    public static final String QUICKMESSAGE_ENABLED      = "pref_key_quickmessage";
-    public static final String QM_LOCKSCREEN_ENABLED     = "pref_key_qm_lockscreen";
-    public static final String QM_CLOSE_ALL_ENABLED      = "pref_key_close_all";
-    public static final String QM_DARK_THEME_ENABLED     = "pref_dark_theme";
+    public static final String QUICKMESSAGE_ENABLED = "pref_key_quickmessage";
+    public static final String QM_LOCKSCREEN_ENABLED = "pref_key_qm_lockscreen";
+    public static final String QM_CLOSE_ALL_ENABLED = "pref_key_close_all";
+    public static final String QM_DARK_THEME_ENABLED = "pref_dark_theme";
 
     // Blacklist
-    public static final String BLACKLIST                 = "pref_blacklist";
+    public static final String BLACKLIST = "pref_blacklist";
+
+    // Direct Call
+    private static final String DIRECT_CALL_PREF = "direct_call_pref";
 
     // Menu entries
-    private static final int MENU_RESTORE_DEFAULTS    = 1;
+    private static final int MENU_RESTORE_DEFAULTS = 1;
 
     // Preferences for enabling and disabling SMS
     private Preference mSmsDisabledPref;
@@ -121,9 +127,15 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private PreferenceCategory mNotificationPrefCategory;
 
     // Delay send
-    public static final String SEND_DELAY_DURATION       = "pref_key_send_delay";
+    public static final String SEND_DELAY_DURATION = "pref_key_send_delay";
+    
+    // Message font size
+    public static final String MESSAGE_FONT_SIZE = "pref_key_mms_message_font_size";
 
     private ListPreference mMessageSendDelayPref;
+
+    private SharedPreferences sp;
+
     private Preference mSmsLimitPref;
     private Preference mSmsDeliveryReportPref;
     private CheckBoxPreference mSmsSplitCounterPref;
@@ -167,9 +179,16 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Blacklist
     private PreferenceScreen mBlacklist;
 
+    // Direct Call
+    private CheckBoxPreference mDirectCall;
+
+    private EditTextPreference mSignature;
+    private String mSignatureText;
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         loadPrefs();
 
@@ -243,6 +262,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mMmsReadReportPref = findPreference("pref_key_mms_read_reports");
         mMmsLimitPref = findPreference("pref_key_mms_delete_limit");
         mClearHistoryPref = findPreference("pref_key_mms_clear_history");
+        mDirectCall = (CheckBoxPreference) findPreference("direct_call_pref");
         mEnableNotificationsPref = (CheckBoxPreference) findPreference(NOTIFICATION_ENABLED);
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
         mEnablePrivacyModePref = (CheckBoxPreference) findPreference(PRIVACY_MODE_ENABLED);
@@ -252,8 +272,13 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         mManageTemplate = findPreference(MANAGE_TEMPLATES);
         mGestureSensitivity = (ListPreference) findPreference(GESTURE_SENSITIVITY);
+
         mUnicodeStripping = (ListPreference) findPreference(UNICODE_STRIPPING);
         mUnicodeStrippingEntries = getResources().getTextArray(R.array.pref_unicode_stripping_entries);
+
+        mSignature = (EditTextPreference) findPreference(MSG_SIGNATURE);
+        mSignature.setOnPreferenceChangeListener(this);
+        mSignature.setText(sp.getString(MSG_SIGNATURE, ""));
 
         // QuickMessage
         mEnableQuickMessagePref = (CheckBoxPreference) findPreference(QUICKMESSAGE_ENABLED);
@@ -715,6 +740,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         return qmDarkThemeEnabled;
     }
 
+    public static boolean getDirectCallEnabled(Context context) {
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    boolean directCallEnabled = prefs.getBoolean(MessagingPreferenceActivity.DIRECT_CALL_PREF,false);
+    return directCallEnabled;
+    }
+
     private void registerListeners() {
         mRingtonePref.setOnPreferenceChangeListener(this);
     }
@@ -732,6 +763,11 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             mMessageSendDelayPref.setValue(value);
             mMessageSendDelayPref.setSummary(mMessageSendDelayPref.getEntry());
             result = true;
+        } else if (preference == mSignature) {
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString(MSG_SIGNATURE, (String) newValue);
+            editor.commit();
+            mSignature.setText(sp.getString(MSG_SIGNATURE, ""));
         }
         return result;
     }
