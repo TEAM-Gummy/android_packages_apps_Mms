@@ -277,10 +277,12 @@
             android:title="@string/pref_title_input_type"
             android:entries="@array/pref_entries_input_type"
             android:entryValues="@array/pref_values_input_type" />
+
         <CheckBoxPreference
             android:key="direct_call_pref"
             android:title="@string/direct_call_title"
             android:summary="@string/direct_call_summary"/>
+
         <ListPreference
             android:key="pref_key_mms_message_font_size"
             android:defaultValue="18"
@@ -289,6 +291,7 @@
             android:entries="@array/pref_mms_message_font_size_entries"
             android:entryValues="@array/pref_mms_message_font_size_values"
             android:dialogTitle="@string/pref_dialogtitle_mms_message_font_size"/>
+
         <EditTextPreference
             android:key="pref_msg_signature"
             android:title="@string/msg_sig_title"
@@ -297,4 +300,5 @@
             android:hint="@string/msg_sig_enter_text"
             android:defaultValue="" />
   </PreferenceCategory>
+
 </PreferenceScreen>

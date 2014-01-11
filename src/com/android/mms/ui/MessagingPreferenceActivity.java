@@ -182,6 +182,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Direct Call
     private CheckBoxPreference mDirectCall;
 
+    // Signature
     private EditTextPreference mSignature;
     private String mSignatureText;
 
