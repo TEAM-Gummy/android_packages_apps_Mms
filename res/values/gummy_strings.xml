@@ -17,10 +17,6 @@
     <!-- Message options - Add SMS to calendar -->
     <string name="menu_add_to_calendar">Add to calendar</string>
 
-    <!-- Breathing Notifications -->
-    <string name="sms_breath">Breathing SMS</string>
-    <string name="sms_breath_summary">Will give your sms notifications a breathing effect in the statusbar.</string>
-
     <!-- QM - Dialog box buttons -->
     <string name="button_close">Close</string>
     <string name="button_view">View</string>
