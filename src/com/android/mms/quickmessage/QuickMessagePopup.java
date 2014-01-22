@@ -168,11 +168,13 @@ public class QuickMessagePopup extends Activity implements
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mCloseClosesAll = prefs.getBoolean(MessagingPreferenceActivity.QM_CLOSE_ALL_ENABLED, false);
         mWakeAndUnlock = prefs.getBoolean(MessagingPreferenceActivity.QM_LOCKSCREEN_ENABLED, false);
-        mDarkTheme = prefs.getBoolean(MessagingPreferenceActivity.QM_DARK_THEME_ENABLED, false);
         mUnicodeStripping = prefs.getInt(MessagingPreferenceActivity.UNICODE_STRIPPING_VALUE,
                 MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT);
         mInputMethod = Integer.parseInt(prefs.getString(MessagingPreferenceActivity.INPUT_TYPE,
                 Integer.toString(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE)));
+
+        mDarkTheme = mContext.getResources().getConfiguration().uiInvertedMode
+                         == Configuration.UI_INVERTED_MODE_YES;
 
         // Set the window features and layout
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -274,6 +276,13 @@ public class QuickMessagePopup extends Activity implements
                 removeMatchingMessages(threadId);
             }
         } else {
+            if (newMessage && mCurrentPage != -1) {
+                // Save the EditText contents, so it doesn't get lost when the PagerAdapter updates
+                mCurrentQm = mMessageList.get(mCurrentPage);
+                mCurrentQm.saveReplyText();
+                dismissKeyboard(mCurrentQm);
+                if (DEBUG) Log.d(LOG_TAG, "parseIntent(): Saved EditText=[" + mCurrentQm.getReplyText() + "]");
+            }
             // Parse the intent and ensure we have a notification object to work with
             NotificationInfo nm = (NotificationInfo) extras.getParcelable(SMS_NOTIFICATION_OBJECT_EXTRA);
             if (nm != null) {
@@ -764,12 +773,7 @@ public class QuickMessagePopup extends Activity implements
 
             // Load the layout to be used
             LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View layout;
-            if (mDarkTheme) {
-                layout = inflater.inflate(R.layout.quickmessage_content_dark, null);
-            } else {
-                layout = inflater.inflate(R.layout.quickmessage_content_light, null);
-            }
+            View layout = inflater.inflate(R.layout.quickmessage_content_light, null);
 
             // Load the main views
             EditText qmReplyText = (EditText) layout.findViewById(R.id.embedded_text_editor);
