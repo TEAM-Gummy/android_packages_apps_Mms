@@ -105,8 +105,11 @@ import android.provider.Telephony.Mms;
 import android.provider.Telephony.Sms;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.telephony.MSimSmsManager;
+import android.telephony.MSimTelephonyManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
@@ -122,8 +125,10 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.View.OnKeyListener;
@@ -139,10 +144,12 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Button;
 
 import com.android.internal.telephony.util.BlacklistUtils;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.telephony.MSimConstants;
 import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
 import com.android.mms.MmsConfig;
@@ -754,7 +761,11 @@ public class ComposeMessageActivity extends Activity
     private class SendIgnoreInvalidRecipientListener implements OnClickListener {
         @Override
         public void onClick(DialogInterface dialog, int whichButton) {
-            sendMessage(true);
+            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                sendMsimMessage(true);
+            } else {
+                sendMessage(true);
+            }
             dialog.dismiss();
         }
     }
@@ -769,9 +780,96 @@ public class ComposeMessageActivity extends Activity
         }
     }
 
+    private void dismissMsimDialog() {
+        if (mMsimDialog != null) {
+            mMsimDialog.dismiss();
+        }
+    }
+
+   private void processMsimSendMessage(int subscription, final boolean bCheckEcmMode) {
+        if (mMsimDialog != null) {
+            mMsimDialog.dismiss();
+        }
+        mWorkingMessage.setWorkingMessageSub(subscription);
+        sendMessage(bCheckEcmMode);
+    }
+
+    private void LaunchMsimDialog(final boolean bCheckEcmMode) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ComposeMessageActivity.this);
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.multi_sim_sms_sender,
+                              (ViewGroup)findViewById(R.id.layout_root));
+        builder.setView(layout);
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK: {
+                            dismissMsimDialog();
+                            return true;
+                        }
+                        case KeyEvent.KEYCODE_SEARCH: {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+        );
+
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dismissMsimDialog();
+            }
+        });
+
+        ContactList recipients = isRecipientsEditorVisible() ?
+            mRecipientsEditor.constructContactsFromInput(false) : getRecipients();
+        builder.setTitle(getResources().getString(R.string.to_address_label)
+                + recipients.formatNamesAndNumbers(","));
+
+        mMsimDialog = builder.create();
+        mMsimDialog.setCanceledOnTouchOutside(true);
+
+        int[] smsBtnIds = {R.id.BtnSubOne, R.id.BtnSubTwo, R.id.BtnSubThree};
+        int[] subString={R.string.sub1, R.string.sub2, R.string.sub3};
+        int phoneCount = MSimTelephonyManager.getDefault().getPhoneCount();
+        Button[] smsBtns = new Button[phoneCount];
+
+        for (int i = 0; i < phoneCount; i++) {
+            final int subscription = i;
+            smsBtns[i] = (Button) layout.findViewById(smsBtnIds[i]);
+            smsBtns[i].setVisibility(View.VISIBLE);
+            smsBtns[i].setText(subString[i]);
+            smsBtns[i].setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Log.d(TAG, "Sub slected "+subscription);
+                        processMsimSendMessage(subscription, bCheckEcmMode);
+                }
+            });
+        }
+        mMsimDialog.show();
+    }
+
+    private void sendMsimMessage(boolean bCheckEcmMode) {
+
+        if(MSimSmsManager.getDefault().isSMSPromptEnabled()) {
+            LaunchMsimDialog(bCheckEcmMode);
+        } else {
+            int preferredSmsSub = MSimSmsManager.getDefault().getPreferredSmsSubscription();
+            mWorkingMessage.setWorkingMessageSub(preferredSmsSub);
+            sendMessage(bCheckEcmMode);
+        }
+    }
+
     private void confirmSendMessageIfNeeded() {
         if (!isRecipientsEditorVisible()) {
-            sendMessage(true);
+            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                sendMsimMessage(true);
+            } else {
+                sendMessage(true);
+            }
             return;
         }
 
@@ -799,7 +897,11 @@ public class ComposeMessageActivity extends Activity
             // as the destination.
             ContactList contacts = mRecipientsEditor.constructContactsFromInput(false);
             mDebugRecipients = contacts.serialize();
-            sendMessage(true);
+            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                sendMsimMessage(true);
+            } else {
+                sendMessage(true);
+            }
         }
     }
 
@@ -1361,6 +1463,10 @@ public class ComposeMessageActivity extends Activity
                         subject += msgItem.mSubject;
                     }
                     intent.putExtra("subject", subject);
+                    String[] numbers = mConversation.getRecipients().getNumbers();
+                    if (numbers != null) {
+                        intent.putExtra("msg_recipient",numbers[0]);
+                    }
                 }
                 // ForwardMessageActivity is simply an alias in the manifest for
                 // ComposeMessageActivity. We have to make an alias because ComposeMessageActivity
@@ -2265,11 +2371,6 @@ public class ComposeMessageActivity extends Activity
     protected void onRestart() {
         super.onRestart();
 
-        // hide the compose panel to reduce jank when re-entering this activity.
-        // if we don't hide it here, the compose panel will flash before the keyboard shows
-        // (when keyboard is suppose to be shown).
-        hideBottomPanel();
-
         if (mWorkingMessage.isDiscarded()) {
             // If the message isn't worth saving, don't resurrect it. Doing so can lead to
             // a situation where a new incoming message gets the old thread id of the discarded
@@ -2329,6 +2430,11 @@ public class ComposeMessageActivity extends Activity
 
         // reset mMessagesAndDraftLoaded
         mMessagesAndDraftLoaded = false;
+        long threadId = mWorkingMessage.getConversation().getThreadId();
+        // Same recipient for ForwardMms will not load draft
+        if (MessageUtils.sSameRecipientList.contains(threadId)) {
+            mShouldLoadDraft = false;
+        }
 
         if (!DEFER_LOADING_MESSAGES_AND_DRAFT) {
             loadMessagesAndDraft(1);
@@ -3231,10 +3337,13 @@ public class ComposeMessageActivity extends Activity
                 if (data != null) {
                     WorkingMessage newMessage = WorkingMessage.load(this, data.getData());
                     if (newMessage != null) {
+                        // Here we should keep the subject from the old mWorkingMessage.
+                        setNewMessageSubject(newMessage);
                         mWorkingMessage = newMessage;
                         mWorkingMessage.setConversation(mConversation);
                         updateThreadIdIfRunning();
                         drawTopPanel(false);
+                        drawBottomPanel();
                         updateSendButtonState();
                     }
                 }
@@ -3324,6 +3433,17 @@ public class ComposeMessageActivity extends Activity
         }
         mRecipientsEditor.setText(null);
         mRecipientsEditor.populate(list);
+    }
+
+    /**
+     * Set newWorkingMessage's subject from mWorkingMessage. If we create a new
+     * slideshow. We will drop the old workingMessage and create a new one. And
+     * we should keep the subject of the old workingMessage.
+     */
+    private void setNewMessageSubject(WorkingMessage newWorkingMessage) {
+        if (null != newWorkingMessage && mWorkingMessage.hasSubject()) {
+            newWorkingMessage.setSubject(mWorkingMessage.getSubject(), true);
+        }
     }
 
     private void processPickResult(final Intent data) {
@@ -3518,9 +3638,17 @@ public class ComposeMessageActivity extends Activity
         // If this is a forwarded message, it will have an Intent extra
         // indicating so.  If not, bail out.
         if (!mForwardMessageMode) {
+            if (mConversation != null) {
+                mConversation.setHasMmsForward(false);
+            }
             return false;
         }
 
+        if (mConversation != null) {
+            mConversation.setHasMmsForward(true);
+            String recipientNumber = intent.getStringExtra("msg_recipient");
+            mConversation.setForwardRecipientNumber(recipientNumber);
+        }
         Uri uri = intent.getParcelableExtra("msg_uri");
 
         if (Log.isLoggable(LogTag.APP, Log.DEBUG)) {
@@ -3954,7 +4082,10 @@ public class ComposeMessageActivity extends Activity
                 new Runnable() {
                     @Override
                     public void run() {
-                        drawTopPanel(false);
+                        // It decides whether or not to display the subject editText view,
+                        // according to the situation whether there's subject
+                        // or the editText view is visible before leaving it.
+                        drawTopPanel(isSubjectEditorVisible());
                         drawBottomPanel();
                         updateSendButtonState();
                     }
