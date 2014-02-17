@@ -377,6 +377,7 @@ public class MessagingNotification {
         public final int mAttachmentType;
         public final String mSubject;
         public final long mThreadId;
+        public final int mSubId;
 
         /**
          * @param isSms true if sms, false if mms
@@ -391,12 +392,13 @@ public class MessagingNotification {
          * @param sender contact of the sender
          * @param attachmentType of the mms attachment
          * @param threadId thread this message belongs to
+         * @param subId subscription used for this message
          */
         public NotificationInfo(boolean isSms,
                 Intent clickIntent, String message, String subject,
                 CharSequence ticker, long timeMillis, String title,
                 Bitmap attachmentBitmap, Contact sender,
-                int attachmentType, long threadId) {
+                int attachmentType, long threadId, int subId) {
             mIsSms = isSms;
             mClickIntent = clickIntent;
             mMessage = message;
@@ -408,6 +410,7 @@ public class MessagingNotification {
             mSender = sender;
             mAttachmentType = attachmentType;
             mThreadId = threadId;
+            mSubId = subId;
         }
 
         public long getTime() {
@@ -530,6 +533,7 @@ public class MessagingNotification {
             arg0.writeParcelable(mAttachmentBitmap, 0);
             arg0.writeInt(mAttachmentType);
             arg0.writeLong(mThreadId);
+            arg0.writeInt(mSubId);
         }
 
         public NotificationInfo(Parcel in) {
@@ -544,6 +548,7 @@ public class MessagingNotification {
             mSender = null;
             mAttachmentType = in.readInt();
             mThreadId = in.readLong();
+            mSubId = in.readInt();
         }
 
         public static final Parcelable.Creator<NotificationInfo> CREATOR = new Parcelable.Creator<NotificationInfo>() {
@@ -830,7 +835,7 @@ public class MessagingNotification {
 
         return new NotificationInfo(isSms,
                 clickIntent, message, subject, ticker, timeMillis,
-                senderInfoName, attachmentBitmap, contact, attachmentType, threadId);
+                senderInfoName, attachmentBitmap, contact, attachmentType, threadId, subId);
     }
 
     public static void cancelNotification(Context context, int notificationId) {
