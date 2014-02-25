@@ -78,6 +78,7 @@ public class MmsSystemEventReceiver extends BroadcastReceiver {
             if (mmsNetworkInfo == null) {
                 return;
             }
+
             boolean available = false;
             boolean isConnected = false;
 
