@@ -805,18 +805,6 @@
 
     <!-- In message list items, this string builds the timestamp line when the message is in a group [CHAR LIMIT=NONE] -->
     <string name="message_timestamp_format"><xliff:g id="string" example="Fred Flinstone">%1$s</xliff:g>\u0020-\u0020<xliff:g id="string" example="9:39AM">%2$s</xliff:g></string>
-    <string name="storage_warning_title">"Your phone's storage is full"</string>
-    <string name="storage_warning_content">"You won't receive new SMS/MMS messages"</string>
-
-    <!--  Strings used forh MMS push of messages in outbox -->
-    <string name="label_mms_send_outbox_msg">MMS Wakeup</string>
-    <string name="desc_mms_send_outbox_msg">Sends out all MMSs from the outbox to the network</string>
-
-    <!-- Banner in conversation list for making Messaging the default SMS app -->
-    <string name="banner_sms_promo_title_initial">Messaging is not your SMS app</string>
-    <string name="banner_sms_promo_title_application"><xliff:g id="appName">%s</xliff:g> is your SMS app</string>
-    <string name="banner_sms_promo_message">You can change this in Settings</string>
-
     <!-- Subscription selection strings -->
     <string name="select_subscription_title">Select Subscription</string>
     <string name="subscription1_title">Subscription 1</string>
@@ -833,5 +821,17 @@
     <string name="progress_mms_title">MMS transaction on other sub in progress</string>
     <string name="progress_mms">Messaging: MMS in progress...</string>
     <string name="progress_mms_text ">Touch to retry again</string>
+
+    <string name="storage_warning_title">"Your phone's storage is full"</string>
+    <string name="storage_warning_content">"You won't receive new SMS/MMS messages"</string>
+
+    <!--  Strings used forh MMS push of messages in outbox -->
+    <string name="label_mms_send_outbox_msg">MMS Wakeup</string>
+    <string name="desc_mms_send_outbox_msg">Sends out all MMSs from the outbox to the network</string>
+
+    <!-- Banner in conversation list for making Messaging the default SMS app -->
+    <string name="banner_sms_promo_title_initial">Messaging is not your SMS app</string>
+    <string name="banner_sms_promo_title_application"><xliff:g id="appName">%s</xliff:g> is your SMS app</string>
+    <string name="banner_sms_promo_message">You can change this in Settings</string>
 
 </resources>

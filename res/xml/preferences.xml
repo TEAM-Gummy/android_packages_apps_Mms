@@ -20,7 +20,6 @@
 -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="pref_key_root">
-
     <Preference
         android:key="pref_key_sms_disabled"
         android:title="@string/pref_title_sms_disabled"
@@ -32,7 +31,6 @@
             <extra android:name="package" android:value="com.android.mms"/>
         </intent>
     </Preference>
-
     <Preference
         android:key="pref_key_sms_enabled"
         android:title="@string/pref_title_sms_enabled"
@@ -52,7 +50,6 @@
             android:title="@string/pref_mms_clear_search_history_title"
             android:summary="@string/pref_mms_clear_search_history_summary" />
 -->
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_key_auto_delete"
@@ -180,6 +177,15 @@
             android:dependency="pref_key_enable_notifications"
             android:defaultValue="false" />
 
+        <ListPreference
+            android:key="pref_key_mms_notification_vibrate_pattern"
+            android:dependency="pref_key_vibrate"
+            android:defaultValue=""
+            android:title="@string/pref_title_mms_notification_vibrate_pattern"
+            android:summary="@string/pref_summary_mms_notification_vibrate_pattern"
+            android:entries="@array/pref_mms_notification_vibrate_pattern_entries"
+            android:entryValues="@array/pref_mms_notification_vibrate_pattern_values"
+            android:dialogTitle="@string/pref_title_mms_notification_vibrate_pattern" />
     </PreferenceCategory>
 
     <!-- QuickMessage settings -->
@@ -266,12 +272,10 @@
             android:title="@string/pref_title_input_type"
             android:entries="@array/pref_entries_input_type"
             android:entryValues="@array/pref_values_input_type" />
-
         <CheckBoxPreference
             android:key="direct_call_pref"
             android:title="@string/direct_call_title"
             android:summary="@string/direct_call_summary"/>
-
         <ListPreference
             android:key="pref_key_mms_message_font_size"
             android:defaultValue="18"
@@ -280,7 +284,6 @@
             android:entries="@array/pref_mms_message_font_size_entries"
             android:entryValues="@array/pref_mms_message_font_size_values"
             android:dialogTitle="@string/pref_dialogtitle_mms_message_font_size"/>
-
         <EditTextPreference
             android:key="pref_msg_signature"
             android:title="@string/msg_sig_title"
@@ -289,5 +292,4 @@
             android:hint="@string/msg_sig_enter_text"
             android:defaultValue="" />
   </PreferenceCategory>
-
 </PreferenceScreen>
