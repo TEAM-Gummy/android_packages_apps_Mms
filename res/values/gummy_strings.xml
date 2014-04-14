@@ -190,4 +190,10 @@
     <string name="msg_sig_summary">Set a custom Signature for messages</string>
     <string name="msg_sig_enter_text">Enter signature text</string>
 
+    <!-- Menu item - Insert smiley -->
+    <string name="menu_insert_smiley">Insert smiley</string>
+
+    <!-- Enable emoticons -->
+    <string name="pref_title_enable_emoticons">Emoticons support</string>
+    <string name="pref_summary_enable_emoticons">Substitute text emoticons with graphical equivalents</string>
 </resources>
